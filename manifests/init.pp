@@ -86,11 +86,9 @@
 # @param ldap_enable
 #   Enable ldap support on the package
 #
-# @param delete_on_error
-#   True if you want that the configuration is deleted on an error
-#   during a complete visudo -c run. If false it will just return
-#   an error and will add a comment to the sudoers configuration so
-#   that the resource will be checked at the following run.
+# @param full_syntax_check
+#   Will run visudo -c and check all sudo rule files for syntax.
+#   In case of error the puppet run will also run into an error.
 #
 # @param validate_single
 #   Do a validate on the "single" file in the sudoers.d directory.
@@ -141,8 +139,8 @@ class sudo (
   Optional[String[1]]                            $content_string      = undef,
   Optional[String[1]]                            $secure_path         = $sudo::params::secure_path,
   Boolean                                        $ldap_enable         = false,
-  Boolean                                        $delete_on_error     = true,
-  Boolean                                        $validate_single     = false,
+  Boolean                                        $full_syntax_check   = false,
+  Boolean                                        $validate_single     = true,
   Boolean                                        $config_dir_keepme   = $sudo::params::config_dir_keepme,
   Boolean                                        $use_sudoreplay      = false,
   Enum['absent','password','nopassword']         $wheel_config        = $sudo::params::wheel_config,
@@ -242,4 +240,14 @@ class sudo (
       * => $config,
     }
   }
+
+  if $full_syntax_check == true {
+    $sudo_syntax_path = '/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
+    exec {"sudo-syntax-check for all files":
+      command     => "visudo -c",
+      unless      => "visudo -c",
+      path        => $sudo_syntax_path,
+    }
+  }
+
 }

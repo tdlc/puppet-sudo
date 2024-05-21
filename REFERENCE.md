@@ -73,8 +73,7 @@ The following parameters are available in the `sudo` class:
 * [`content_string`](#-sudo--content_string)
 * [`secure_path`](#-sudo--secure_path)
 * [`ldap_enable`](#-sudo--ldap_enable)
-* [`delete_on_error`](#-sudo--delete_on_error)
-* [`validate_single`](#-sudo--validate_single)
+* [`full_syntax_check`](#-sudo--full_syntax_check)
 * [`config_dir_keepme`](#-sudo--config_dir_keepme)
 * [`use_sudoreplay`](#-sudo--use_sudoreplay)
 * [`wheel_config`](#-sudo--wheel_config)
@@ -282,26 +281,14 @@ Enable ldap support on the package
 
 Default value: `false`
 
-##### <a name="-sudo--delete_on_error"></a>`delete_on_error`
+##### <a name="-sudo--full_syntax_check"></a>`full_syntax_path`
 
 Data type: `Boolean`
 
-True if you want that the configuration is deleted on an error
-during a complete visudo -c run. If false it will just return
-an error and will add a comment to the sudoers configuration so
-that the resource will be checked at the following run.
+Run into an error if any sudo rules file has a syntax error.
+Will use visudo -c.
 
 Default value: `true`
-
-##### <a name="-sudo--validate_single"></a>`validate_single`
-
-Data type: `Boolean`
-
-Do a validate on the "single" file in the sudoers.d directory.
-If the validate fail the file will not be saved or changed
-if a file already exist.
-
-Default value: `false`
 
 ##### <a name="-sudo--config_dir_keepme"></a>`config_dir_keepme`
 
@@ -456,7 +443,6 @@ The following parameters are available in the `sudo::conf` defined type:
 * [`template`](#-sudo--conf--template)
 * [`sudo_config_dir`](#-sudo--conf--sudo_config_dir)
 * [`sudo_file_name`](#-sudo--conf--sudo_file_name)
-* [`sudo_syntax_path`](#-sudo--conf--sudo_syntax_path)
 
 ##### <a name="-sudo--conf--ensure"></a>`ensure`
 

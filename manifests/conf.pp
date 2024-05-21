@@ -26,9 +26,6 @@
 # @param sudo_file_name
 #   Set a custom file name for the snippet
 #
-# @param sudo_syntax_path
-#   Path to use for executing the sudo syntax check
-#
 # @example
 #   sudo::conf { 'admins':
 #     source => 'puppet:///files/etc/sudoers.d/admins',
@@ -42,7 +39,6 @@ define sudo::conf (
   Optional[String[1]]                            $template         = undef,
   Optional[String[1]]                            $sudo_config_dir  = undef,
   Optional[String[1]]                            $sudo_file_name   = undef,
-  String[1]                                      $sudo_syntax_path = '/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
 ) {
   include sudo
 
@@ -107,23 +103,9 @@ define sudo::conf (
     $content_real = undef
   }
 
-  if $ensure == 'present' {
-    if $sudo::validate_single {
-      $validate_cmd_real = 'visudo -c -f %'
-    } else {
-      $validate_cmd_real = undef
-    }
-    if $sudo::delete_on_error {
-      $notify_real = Exec["sudo-syntax-check for file ${cur_file}"]
-      $delete_cmd = "( rm -f '${cur_file_real}' && exit 1)"
-    } else {
-      $notify_real = Exec["sudo-syntax-check for file ${cur_file}"]
-      $errormsg = "Error on global-syntax-check with file ${cur_file_real}"
-      $delete_cmd = "( echo '${errormsg}' && echo '#${errormsg}' >>${cur_file_real} && exit 1)"
-    }
+  if $ensure == 'present' and $sudo::validate_single == true {
+    $validate_cmd_real = 'visudo -c -f %'
   } else {
-    $delete_cmd = ''
-    $notify_real = undef
     $validate_cmd_real = undef
   }
 
@@ -135,14 +117,8 @@ define sudo::conf (
     mode         => $sudo::params::config_file_mode,
     source       => $source,
     content      => $content_real,
-    notify       => $notify_real,
     require      => File[$sudo_config_dir_real],
     validate_cmd => $validate_cmd_real,
   }
 
-  exec { "sudo-syntax-check for file ${cur_file}":
-    command     => "visudo -c || ${delete_cmd}",
-    refreshonly => true,
-    path        => $sudo_syntax_path,
-  }
 }
